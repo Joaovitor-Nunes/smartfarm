@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useAuth } from "../src/contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/router";
 
 export default function NavBar() {

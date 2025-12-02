@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
   }, [token, user]);
 
   function login(tokenValue, userObj) {
-    setToken(tokenValue);
+    setToken(tokenValue); 
     setUser(userObj);
   }
   function logout() {

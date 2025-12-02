@@ -1,16 +1,30 @@
 :root {
-  --primary: #2a5d2a;
-  --accent: #3b7a57;
-  --bg: #f1f3f1;
-  --card-bg: #ffffff;
+  /* Cores Principais (Verde Neon) */
+  --primary-color: #00ff00;    /* Verde brilhante */
+  --primary-dark: #00cc00;     /* Verde um pouco mais escuro para o gradiente */
+  --primary-light: #33ff33;    /* Verde mais claro para hover */
+
+  /* Cores de Fundo (Escuro/Preto) */
+  --bg-color: #121212;         /* Fundo da tela (Body) */
+  --bg-card: #1e1e1e;          /* Fundo do card de login */
+
+  /* Cores de Texto e Borda */
+  --text-color: #e0e0e0;       /* Texto principal (claro) */
+  --text-secondary: #a0a0a0;   /* Texto secundário (cinza claro) */
+  --border-color: #333333;     /* Borda do card e dos inputs */
+
+  /* Cores de Mensagens */
+  --error-color: #ff4444;      /* Vermelho para erro */
+  --success-color: #00ff00;    /* Usamos o primário para sucesso */
 }
 
+/* Base (Obrigatório para mudar o fundo da tela) */
 * { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: Inter, Arial, sans-serif;
-  background: var(--bg);
-  color: #222;
+  background: var(--bg-color); /* Aplica o fundo preto */
+  color: var(--text-color);     /* Aplica o texto claro */
 }
 .container { max-width: 1100px; margin: auto; padding: 20px; }
 .card {

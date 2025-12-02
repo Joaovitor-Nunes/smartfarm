@@ -1,6 +1,6 @@
 import NavBar from "../components/NavBar";
 import { useEffect, useState } from "react";
-import ProtectedRoute from "../src/components/ProtectedRoute";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 export default function Logs() {
   const [logs, setLogs] = useState([]);
