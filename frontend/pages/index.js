@@ -4,8 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import LineChart from '../components/LineChart';
 import styles from '../styles/home.module.css';
 
-// Configuração do ESP32 (substitua pelo IP real do seu ESP32)
-const ESP32_IP = "http://10.106.33.1"; // Altere para o IP do seu ESP32
+// Configuração do ESP32 
+const ESP32_IP = "http://10.106.33.1"; 
 
 export default function Home() {
   const { user } = useAuth();
@@ -14,11 +14,14 @@ export default function Home() {
   const [isLoading, setIsLoading] =  useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('Conectando...');
+  const [dataSource, setDataSource] = useState('ESP32 (Real)');
+  const [lastError, setLastError] = useState(null);
 
   // Função para buscar dados do ESP32
   const fetchSensorData = async () => {
     try {
       setIsLoading(true);
+      setLastError(null);
       
       // Timeout de 3 segundos
       const controller = new AbortController();
@@ -31,10 +34,15 @@ export default function Home() {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        throw new Error('Erro na resposta do ESP32');
+        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
+      
+      // Validação básica dos dados recebidos
+      if (!data || typeof data !== 'object') {
+        throw new Error('Dados recebidos em formato inválido');
+      }
       
       // Normaliza a luminosidade (como no tutorial)
       if (data.light !== undefined) {
@@ -43,6 +51,7 @@ export default function Home() {
       
       setSensorData(data);
       setConnectionStatus('Conectado');
+      setDataSource('ESP32 (Real)');
       
       // Atualiza histórico (mantém últimos 20 pontos)
       setSensorHistory(prev => {
@@ -63,18 +72,36 @@ export default function Home() {
     } catch (error) {
       console.error('Erro ao buscar dados do ESP32:', error);
       setConnectionStatus('Desconectado');
+      setDataSource('Simulação (Demo)');
+      setLastError(error.message);
       
-      // Dados simulados para demonstração (remova em produção)
-      if (!sensorData) {
-        const simulatedData = {
-          temperature: 25.3 + (Math.random() * 2 - 1),
-          humidity: 60 + (Math.random() * 10 - 5),
-          soil: 45 + (Math.random() * 20 - 10),
-          light: 70 + (Math.random() * 30 - 15),
-          water: 30 + (Math.random() * 40 - 20)
-        };
-        setSensorData(simulatedData);
-      }
+      // Dados simulados para demonstração - SEMPRE gera novos dados
+      const simulatedData = {
+        temperature: 25.3 + (Math.random() * 2 - 1),
+        humidity: 60 + (Math.random() * 10 - 5),
+        soil: 45 + (Math.random() * 20 - 10),
+        light: 70 + (Math.random() * 30 - 15),
+        water: 30 + (Math.random() * 40 - 20)
+      };
+      
+      // Atualiza sempre com novos dados simulados
+      setSensorData(simulatedData);
+      
+      // Adiciona ao histórico mesmo em modo simulação
+      setSensorHistory(prev => {
+        const newHistory = [...prev, {
+          timestamp: new Date().toLocaleTimeString(),
+          temperature: simulatedData.temperature,
+          humidity: simulatedData.humidity,
+          soil: simulatedData.soil,
+          light: simulatedData.light,
+          water: simulatedData.water
+        }];
+        
+        return newHistory.slice(-20);
+      });
+      
+      setLastUpdate(new Date().toLocaleTimeString());
     } finally {
       setIsLoading(false);
     }
@@ -168,8 +195,35 @@ export default function Home() {
           <span className={styles.titleIcon}>🌱</span>
           Dashboard Smart Farm
         </h1>
-        
-        {/* Remove completamente a statusBar */}
+      </div>
+
+      {/* Indicador de Modo de Operação (Temporário) */}
+      <div className={styles.modeIndicator}>
+        <div className={`${styles.modeCard} ${dataSource === 'ESP32 (Real)' ? styles.modeReal : styles.modeSimulated}`}>
+          <div className={styles.modeHeader}>
+            <span className={styles.modeIcon}>
+              {dataSource === 'ESP32 (Real)' ? '🔌' : '🔄'}
+            </span>
+            <h3>Modo de Operação</h3>
+            <span className={styles.modeBadge}>
+              {dataSource === 'ESP32 (Real)' ? 'REAL' : 'DEMO'}
+            </span>
+          </div>
+          <div className={styles.modeDetails}>
+            <p><strong>Fonte de dados:</strong> {dataSource}</p>
+            <p><strong>Status da conexão:</strong> 
+              <span className={`${styles.statusText} ${connectionStatus === 'Conectado' ? styles.statusConnected : styles.statusDisconnected}`}>
+                {connectionStatus}
+              </span>
+            </p>
+            <p><strong>Última atualização:</strong> {lastUpdate || '--:--'}</p>
+            {lastError && (
+              <p className={styles.errorText}>
+                <strong>Último erro:</strong> {lastError}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Grid de cards de status */}
@@ -273,7 +327,9 @@ export default function Home() {
           <h2>📈 Evolução Temporal dos Sensores</h2>
           <div className={styles.chartControls}>
             <span className={styles.chartInfo}>
-              Dados em tempo real do ESP32 | Atualização: 2s
+              {dataSource === 'ESP32 (Real)' 
+                ? 'Dados em tempo real do ESP32 | Atualização: 2s' 
+                : 'Dados simulados para demonstração | Atualização: 2s'}
             </span>
             <button 
               onClick={fetchSensorData} 
@@ -339,8 +395,13 @@ export default function Home() {
         <div className={styles.infoCard}>
           <h3>🌐 Conexão ESP32</h3>
           <p><strong>Endereço IP:</strong> {ESP32_IP}</p>
-          <p><strong>Status:</strong> {connectionStatus}</p>
+          <p><strong>Status:</strong> 
+            <span className={`${connectionStatus === 'Conectado' ? styles.statusGood : styles.statusBad}`}>
+              {connectionStatus}
+            </span>
+          </p>
           <p><strong>Intervalo de atualização:</strong> 2 segundos</p>
+          <p><strong>Tentativas de reconexão:</strong> Automáticas (2s)</p>
         </div>
         
         <div className={styles.infoCard}>
@@ -348,6 +409,7 @@ export default function Home() {
           <p><strong>Usuário:</strong> {user ? user.username : 'demo_user'}</p>
           <p><strong>Sessão iniciada:</strong> {new Date().toLocaleDateString('pt-BR')}</p>
           <p><strong>Versão:</strong> Smart Farm v2.0.0</p>
+          <p><strong>Modo atual:</strong> {dataSource}</p>
         </div>
       </div>
     </div>
