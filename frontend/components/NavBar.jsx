@@ -10,7 +10,7 @@ export default function NavBar() {
   const navItems = [
     { path: '/', label: 'Home', icon: '🏠' },
     { path: '/sensores', label: 'Sensores', icon: '📡' },
-    { path: '/atuador', label: 'Atuadores', icon: '⚙️' },
+    { path: '/atuadores', label: 'Atuadores', icon: '⚙️' },
     { path: '/indicadores', label: 'Indicadores', icon: '📊' },
     { path: '/logs', label: 'Logs', icon: '📋' },
     { path: '/contato', label: 'Contato/CV', icon: '👤' },
