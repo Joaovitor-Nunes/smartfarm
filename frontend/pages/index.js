@@ -11,7 +11,7 @@ export default function Home() {
   const { user } = useAuth();
   const [sensorData, setSensorData] = useState(null);
   const [sensorHistory, setSensorHistory] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] =  useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('Conectando...');
 
@@ -169,25 +169,7 @@ export default function Home() {
           Dashboard Smart Farm
         </h1>
         
-        <div className={styles.statusBar}>
-          <div className={styles.userInfo}>
-            <span className={styles.userIcon}>👤</span>
-            <div>
-              <div className={styles.userName}>{user ? user.name : 'Aluno Joao'}</div>
-              <div className={styles.userStatus}>{user ? 'Sessão ativa' : 'Modo demonstração'}</div>
-            </div>
-          </div>
-          
-          <div className={styles.connectionInfo}>
-            <div className={`${styles.connectionStatus} ${connectionStatus === 'Conectado' ? styles.connected : connectionStatus === 'Conectando...' ? styles.connecting : styles.disconnected}`}>
-              <span className={styles.statusDot}></span>
-              {connectionStatus}
-            </div>
-            <div className={styles.lastUpdate}>
-              Última atualização: {lastUpdate || '--:--'}
-            </div>
-          </div>
-        </div>
+        {/* Remove completamente a statusBar */}
       </div>
 
       {/* Grid de cards de status */}
